@@ -13,10 +13,13 @@ class Node():
 		return "Node %03d: %s" % (self.index, self.edges)
 
 
-def createGraph(vertexCount, edges):
+def createGraph(vertexCount, edges, reverse=False):
 	nodes = [Node(n) for n in range(vertexCount)]
 	for source, dest, weight in edges:
-		nodes[source].addEdge([dest, weight])
+		if(reverse):
+			nodes[dest].addEdge([source, 0])
+		else:
+			nodes[source].addEdge([dest, weight])
 	return nodes
 
 def targetedBFS(nodes, start, end, build=[], weights=[]):
@@ -25,6 +28,8 @@ def targetedBFS(nodes, start, end, build=[], weights=[]):
 	else:
 		for [dest, weight] in nodes[start].getAvailableEdges():
 			return targetedBFS(nodes, dest, end, build + [start], weights + [weight])
+
+# def fulker
 
 
 edges = [(4, 3, 10), (1, 2, 6), (2, 4, 10)]
