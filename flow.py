@@ -34,6 +34,8 @@ def targetedBFS(nodes, start, end, build=[], weights=[]):
 
 edges = [(4, 3, 10), (1, 2, 6), (2, 4, 10)]
 nodes = createGraph(5, edges)
+backflow = createGraph(5, edges, reverse=True)
 [print(x) for x in nodes]
+[print(x) for x in backflow]
 
 print(targetedBFS(nodes, 1, 4))
