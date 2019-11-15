@@ -1,0 +1,16 @@
+[Regions]
+South Bank, 500
+North Lake, 320
+Orange Mtn, 10
+
+
+[Hospitals]
+Mt. Safety, 410
+North General, 31
+Large Hospice, 530
+
+
+[Ambulatory Service]
+AmbulA, South Bank, Mt. Safety, 100
+AmbulB, South Bank, North General, 50
+AmbulC, Orange Mtn, North Banks, 1000
