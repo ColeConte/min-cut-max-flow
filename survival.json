@@ -1,0 +1,18 @@
+{
+	"regions": [
+		["South Bank", 40],
+		["North Lake", 34],
+		["Orange Mtn", 10]
+	],
+	"hospitals": [
+		["Mt. Safety", 50],
+		["North General", 31],
+		["Large Hospice", 84]
+	],
+	"ambulances": [
+		["ambulA", "South Bank", "Mt. Safety", 54],
+		["ambulB", "South Bank", "North General", 4],
+		["ambulC", "Orange Mtn", "North Banks", 40],
+		["ambulD", "North Lake", "Large Hospice", 14]
+	]
+}
