@@ -9,7 +9,9 @@ import os.path
 #Validate text and integer inputs
 #Validate at least one input
 #Validate for no repeat entries
-#Check that processGraph is working for my input
+#GUI output newlines
+#GUI output for JSON files
+
 
 class MainApplication(tk.Frame):
 	def __init__(self):
@@ -18,6 +20,7 @@ class MainApplication(tk.Frame):
 		self.RegionInputWindow = None
 		self.HospitalInputWindow = None
 		self.AmbulanceInputWindow = None
+		self.OutputWindow = None
 		self.regionsText = "[Regions]\n"
 		self.regions = []
 		self.hospitalsText = "[Hospitals]\n"
@@ -37,6 +40,27 @@ class MainApplication(tk.Frame):
 	'''Creates GUI input window.'''	
 	def createAmbulanceInputWindow(self):
 		self.AmbulanceInputWindow = AmbulanceInputWindow(self)	
+
+	'''Creates GUI output window.'''	
+	def createOutputWindow(self):
+		self.OutputWindow = OutputWindow(self)	
+
+	'''Generates text for GUI output window.'''
+	def generateOutput(self,vNum, fDemanded, edges, names):
+		flowSupplied, pathing = fordFulkerson(vNum, edges, 0, vNum-1)
+		if(fDemanded == flowSupplied):
+			print("Ambulatory Network can sustain all injured.",file=self.OutputWindow.textvar)
+			print("Quickly use the following routes:",file=self.OutputWindow.textvar)
+		else:
+			print("Ambulatory Network *cannot* sustain all injured.",file=self.OutputWindow.textvar)
+			print("To minimize loss of life, triage and use the following routes: ",file=self.OutputWindow.textvar)
+		for (injured, path) in pathing:
+			print("\nSend %05d Injured Along: " % injured, end="",file=self.OutputWindow.textvar)
+			for i, route in enumerate(path[1:-1]):
+				print("%s" % (names[route]), end="",file=self.OutputWindow.textvar)
+				if(i < len(path)-3):
+					print(" -> ", end="",file=self.OutputWindow.textvar)
+			print()
 
 
 
@@ -73,8 +97,10 @@ class SelectionWindow(tk.Frame):
 		extension = os.path.splitext(file)[1]
 		if extension == ".csv":
 			vNum, fDemanded, edges, names = extractFile(file)
-			processGraph(vNum, fDemanded, edges, names)
+			self.root.createOutputWindow()
+			self.root.generateOutput(vNum, fDemanded, edges, names)
 			self.destroy()
+			self.root.OutputWindow.show()
 		elif extension == ".json":
 			computeFromJson(file,isFile=True)
 			self.destroy()
@@ -180,9 +206,38 @@ class AmbulanceInputWindow(tk.Frame):
 		self.root.ambulancesText += ('\n')
 		text = self.root.regionsText + '\n' + self.root.hospitalsText + '\n' + self.root.ambulancesText
 		vNum, fDemanded, edges, names = processGuiInput(text)
-		processGraph(vNum, fDemanded, edges, names) #check that this is working correctly
+		self.root.createOutputWindow()
+		self.root.generateOutput(vNum, fDemanded, edges, names)
 		self.destroy()
+		self.root.OutputWindow.show()
+
+
+class OutputWindow(tk.Frame):
+	def __init__(self,root):
+		super(OutputWindow,self).__init__()
+		self.root = root
+		self.textvar = WritableStringVar(root)
+		outputLabel = tk.Label(self, textvariable=self.textvar,wraplength='800')
+		outputLabel.pack()
+		self.stop = tk.Button(self, text='End', command=self.end).pack()
+
+	'''Shows selection window.'''
+	def show(self):
+		self.pack()
+
+	def end(self):
 		self.root.destroy()
+
+
+class WritableStringVar(tk.StringVar):
+	'''Overrides StringVar class to make it writeable. 
+	Code taken from": 
+	https://stackoverflow.com/questions/42195572/setting-multiple-lines-to-a-label-tkinter'''
+	def write(self, added_text):
+		new_text = self.get() + added_text
+		self.set(new_text)
+	def clear(self):
+		self.set("")
 
 root = MainApplication()
 root.mainloop()

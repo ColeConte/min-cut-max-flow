@@ -112,13 +112,12 @@ def processGraph(vNum, fDemanded, edges, names):
 	flowSupplied, pathing = fordFulkerson(vNum, edges, 0, vNum-1)
 	if(fDemanded == flowSupplied):
 		print("Ambulatory Network can sustain all injured.")
-		print("Quickly use the following routes")
+		print("Quickly use the following routes:")
 	else:
 		print("Ambulatory Network *cannot* sustain all injured.")
 		print("To minimize loss of life, triage and use the following routes: ")
-
 	for (injured, path) in pathing:
-		print("Send %05d Injured Along: " % injured, end="")
+		print("\nSend %05d Injured Along: " % injured, end="")
 		for i, route in enumerate(path[1:-1]):
 			print("%s" % (names[route]), end="")
 			if(i < len(path)-3):
