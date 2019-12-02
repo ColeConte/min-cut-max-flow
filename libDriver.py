@@ -71,4 +71,4 @@ def computeFromJson(input, isFile=False, printData=True):
 		"path": pathList
 	}
 
-print(computeFromJson("survival.json", isFile=True))
+#print(computeFromJson("survival.json", isFile=True))
