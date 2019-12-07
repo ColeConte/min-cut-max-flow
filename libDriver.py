@@ -1,10 +1,10 @@
 import json
 import flow
 
-def __extractFromJson(input, isFile=False):
-	jsonObj = input
+def extractFromJson(inpt, isFile=False):
+	jsonObj = inpt
 	if(isFile):
-		with open(input) as json_input:
+		with open(inpt) as json_input:
 			jsonObj = json.load(json_input)
 
 	edges = []
@@ -37,8 +37,8 @@ def __extractFromJson(input, isFile=False):
 	return (len(vertexNames), flowDemanded, edges, vertexNames)
 
 
-def computeFromJson(input, isFile=False, printData=True):
-	vNum, fDemanded, edges, names = __extractFromJson(input, isFile = isFile)
+def computeFromJson(inpt, isFile=False, printData=True):
+	vNum, fDemanded, edges, names = __extractFromJson(inpt, isFile = isFile)
 	flowSupplied, pathing = flow.fordFulkerson(vNum, edges, 0, vNum-1)
 	if(printData):
 		if(fDemanded == flowSupplied):
