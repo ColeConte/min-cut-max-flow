@@ -7,32 +7,42 @@ def extractFromJson(inpt, isFile=False):
 		with open(inpt) as json_input:
 			jsonObj = json.load(json_input)
 
+	hasHospital, hasRegion, hasAmbulance = False, False, False
+
 	edges = []
 	vertexNames = ["Epicenter"]
 	flowDemanded = 0
+	try: 
+		for hospital, bedsAvailable in jsonObj["hospitals"]:
+			hasHospital = True
+			vertex = len(vertexNames)
+			vertexNames.append(hospital)
+			edges.append([vertex, -2, int(bedsAvailable)])
+		for region, injured in jsonObj["regions"]:
+			hasRegion = True
+			vertex = len(vertexNames)
+			vertexNames.append(region)
+			edges.append([0, vertex, int(injured)])
+			flowDemanded += injured
+		for ambulance, region, hospital, capacity in jsonObj["ambulances"]:
+			hasAmbulance = True
+			vertex = len(vertexNames)
+			vertexNames.append(ambulance)
+			srcInd = vertexNames.index(region) if region in vertexNames else -1
+			dstInd = vertexNames.index(hospital) if hospital in vertexNames else -1
+			edges.append([srcInd, vertex, int(capacity)])
+			edges.append([vertex, dstInd, int(capacity)])
+	
+		sinkVertex = len(vertexNames)
+		vertexNames.append("Safety")
+		for i, e in enumerate(edges):
+			if(e[1] == -2):
+				edges[i][1] = sinkVertex
+	except:
+		return None
 
-	for hospital, bedsAvailable in jsonObj["hospitals"]:
-		vertex = len(vertexNames)
-		vertexNames.append(hospital)
-		edges.append([vertex, -2, bedsAvailable])
-	for region, injured in jsonObj["regions"]:
-		vertex = len(vertexNames)
-		vertexNames.append(region)
-		edges.append([0, vertex, injured])
-		flowDemanded += injured
-	for ambulance, region, hospital, capacity in jsonObj["ambulances"]:
-		vertex = len(vertexNames)
-		vertexNames.append(ambulance)
-		srcInd = vertexNames.index(region) if region in vertexNames else -1
-		dstInd = vertexNames.index(hospital) if hospital in vertexNames else -1
-		edges.append([srcInd, vertex, capacity])
-		edges.append([vertex, dstInd, capacity])
-
-	sinkVertex = len(vertexNames)
-	vertexNames.append("Safety")
-	for i, e in enumerate(edges):
-		if(e[1] == -2):
-			edges[i][1] = sinkVertex
+	if(not(hasAmbulance and hasRegion and hasHospital)):
+		return None
 
 	return (len(vertexNames), flowDemanded, edges, vertexNames)
 
@@ -71,4 +81,4 @@ def computeFromJson(inpt, isFile=False, printData=True):
 		"path": pathList
 	}
 
-#print(computeFromJson("survival.json", isFile=True))
+# print(computeFromJson("survival.json", isFile=True))
