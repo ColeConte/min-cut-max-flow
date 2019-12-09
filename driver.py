@@ -56,7 +56,7 @@ def extractFile(filename):
 	except:
 		return None
 
-	if(not (hasAmbulance and hasRegion and hasHosptial)):
+	if(not (hasAmbulance and hasRegion and hasHospital)):
 		return None
 
 	vertexNames.append("Safety")
