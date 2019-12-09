@@ -58,11 +58,18 @@ class MainApplication(tk.Tk):
 			file = askopenfilename(filetypes=(('csv files','*.csv'),('json files','*.json')),title='Select a file')
 			extension = os.path.splitext(file)[1]
 			if extension == ".csv":
-				vNum, fDemanded, edges, names = extractFile(file)
+				extraction = extractFile(file)
 			elif extension == ".json":
-				vNum, fDemanded, edges, names = libDriver.extractFromJson(file,True)
+				extraction = libDriver.extractFromJson(file,True)
+
 		self.createOutputWindow()
-		self.generateOutput(vNum, fDemanded, edges, names,writeToFile)
+
+		if(extraction):
+			vNum, fDemanded, edges, names = extraction
+			self.generateOutput(vNum, fDemanded, edges, names,writeToFile)
+		else:
+			print("Error on input file", file=self.OutputWindow.textvar)
+
 		self.OutputWindow.show()
 
 	'''Generates text for GUI output window.'''
