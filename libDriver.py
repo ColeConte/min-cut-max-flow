@@ -38,7 +38,7 @@ def extractFromJson(inpt, isFile=False):
 
 
 def computeFromJson(inpt, isFile=False, printData=True):
-	vNum, fDemanded, edges, names = __extractFromJson(inpt, isFile = isFile)
+	vNum, fDemanded, edges, names = extractFromJson(inpt, isFile = isFile)
 	flowSupplied, pathing = flow.fordFulkerson(vNum, edges, 0, vNum-1)
 	if(printData):
 		if(fDemanded == flowSupplied):
