@@ -1,6 +1,6 @@
 Ambulatory Network *cannot* sustain all injured.
 To minimize loss of life, triage and use the following routes: 
 
-Send 00036 Injured Along: South Bank -> ambulA -> Mt. Safety
-Send 00004 Injured Along: South Bank -> ambulB -> North General
-Send 00014 Injured Along: North Lake -> ambulD -> Large Hospice
+Send 00036 Injured Along: South Bank -> AmbulA -> Mt. Safety
+Send 00004 Injured Along: South Bank -> AmbulB -> North General
+Send 00014 Injured Along: North Lake -> AmbulD -> Large Hospice

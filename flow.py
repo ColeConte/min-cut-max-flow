@@ -1,5 +1,3 @@
-# def computeFlow(g, s, t):
-
 MAX_FLOW = 10*1000
 
 # Each edge has a dest and a weight

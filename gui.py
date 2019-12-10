@@ -10,6 +10,7 @@ import os.path
 #Validate for no repeat entries
 
 class MainApplication(tk.Tk):
+	'''Controller for all windows in GUI'''
 	def __init__(self):
 		super(MainApplication,self).__init__()
 		self.selectionWindow = SelectionWindow(self)
@@ -27,33 +28,37 @@ class MainApplication(tk.Tk):
 		self.ambulances = []
 		self.selectionWindow.show()
 
-	'''Creates GUI input window.'''	
+	
 	def createRegionInputWindow(self):
+		'''Creates GUI input window.'''	
 		self.RegionInputWindow = RegionInputWindow(self)
 
-	'''Creates GUI input window.'''	
+	
 	def createHospitalInputWindow(self):
+		'''Creates GUI input window.'''	
 		self.HospitalInputWindow = HospitalInputWindow(self)
 
-	'''Creates GUI input window.'''	
+	
 	def createAmbulanceInputWindow(self):
+		'''Creates GUI input window.'''	
 		self.AmbulanceInputWindow = AmbulanceInputWindow(self)	
 
-	'''Creates GUI output window.'''	
+		
 	def createWriteOutputWindow(self):
+		'''Creates option to write output to file window.'''
 		self.WriteOutputWindow = WriteOutputWindow(self)	
 
-	'''Creates GUI output window.'''	
+		
 	def createOutputWindow(self):
+		'''Creates output window.'''
 		self.OutputWindow = OutputWindow(self)
 
-	'''
-	Imports JSON or CSV file, or reads from GUI input
-	'''
+
 	def importFile(self,writeToFile):
+		'''Imports JSON or CSV file, or reads from GUI input.'''
 		if self.fromGUI:
 			text = self.regionsText + '\n' + self.hospitalsText + '\n' + self.ambulancesText
-			vNum, fDemanded, edges, names = processGuiInput(text)
+			extraction = processGuiInput(text)
 		else:	
 			file = askopenfilename(filetypes=(('csv files','*.csv'),('json files','*.json')),title='Select a file')
 			extension = os.path.splitext(file)[1]
@@ -61,21 +66,17 @@ class MainApplication(tk.Tk):
 				extraction = extractFile(file)
 			elif extension == ".json":
 				extraction = libDriver.extractFromJson(file,True)
-
 		self.createOutputWindow()
-
 		if(extraction):
 			vNum, fDemanded, edges, names = extraction
 			self.generateOutput(vNum, fDemanded, edges, names,writeToFile)
 		else:
 			print("Error on input file", file=self.OutputWindow.textvar)
-
 		self.OutputWindow.show()
 
-	'''Generates text for GUI output window.'''
 	def generateOutput(self,vNum, fDemanded, edges, names,writeToFile):
+		'''Generates text for GUI output window.'''
 		flowSupplied, pathing = fordFulkerson(vNum, edges, 0, vNum-1)
-		#Option to generate an output file
 		files = [self.OutputWindow.textvar]
 		if writeToFile:
 			file = open("output.txt","w+")
@@ -96,21 +97,24 @@ class MainApplication(tk.Tk):
 
 
 class SelectionWindow(tk.Frame):
+	'''Window that allows user to select input type.'''
 	def __init__(self,root):
 		super(SelectionWindow,self).__init__()
 		self.root = root
 		self.radioSelection = tk.IntVar()
-		self.fromFile = tk.Radiobutton(self, text='From File',variable=self.radioSelection,value=0).pack()
-		self.fromGUI = tk.Radiobutton(self, text='From GUI',variable=self.radioSelection,value=1).pack()
-		self.cont = tk.Button(self, text='Continue', width=25, command=self.inputType).pack()
-		self.stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).pack()
+		fromFile = tk.Radiobutton(self, text='From File',variable=self.radioSelection,value=0).pack()
+		fromGUI = tk.Radiobutton(self, text='From GUI',variable=self.radioSelection,value=1).pack()
+		cont = tk.Button(self, text='Continue', width=25, command=self.inputType).pack()
+		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).pack()
 
-	'''Shows selection window.'''
+	
 	def show(self):
+		'''Shows selection window.'''
 		self.pack()
 
-	'''Determines user radio button selection.'''
+	
 	def inputType(self):
+		'''Determines user radio button selection.'''
 		selected = self.radioSelection.get()
 		if(selected == 0):
 			self.root.fromGUI = False
@@ -125,30 +129,38 @@ class SelectionWindow(tk.Frame):
 
 
 class RegionInputWindow(tk.Frame):
+	'''GUI Input Window (region).'''
 	def __init__(self,root):
 		super(RegionInputWindow,self).__init__()
 		self.root = root
-		regionLabel = (tk.Label(self, text='Region: ')).grid(row=0,column=0)
-		victimCountLabel = (tk.Label(self, text='Victims: ')).grid(row=1,column=0)
 		self.regionTextEntry = tk.StringVar()
 		self.victimCountEntry = tk.IntVar()
-		self.region = tk.Entry(self, textvariable = self.regionTextEntry).grid(row=0,column=1) #need to validate text
-		self.victims = tk.Entry(self, textvariable = self.victimCountEntry).grid(row=1,column=1) #need to validate integer
-		self.add = tk.Button(self, text='Add', width=25, command=self.addToRegions).grid(row=2,column=0)
-		self.cont = tk.Button(self, text='Continue', width=25, command=self.toHospitalInput).grid(row=2,column=1)
-		self.stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
-
-	'''Shows input window.'''
+		self.region = tk.Entry(self, textvariable = self.regionTextEntry)
+		self.region.grid(row=0,column=1) #need to validate text
+		self.victims = tk.Entry(self, textvariable = self.victimCountEntry)
+		self.victims.grid(row=1,column=1) #need to validate integer
+		self.cont = tk.Button(self, text='Continue', width=25, command=self.toHospitalInput,state='disabled')
+		self.cont.grid(row=2,column=1)
+		regionLabel = (tk.Label(self, text='Region: ')).grid(row=0,column=0)
+		victimCountLabel = (tk.Label(self, text='Victims: ')).grid(row=1,column=0)
+		add = tk.Button(self, text='Add', width=25, command=self.addToRegions).grid(row=2,column=0)
+		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
+	
 	def show(self):
+		'''Shows input window.'''
 		self.pack()
 
 	def addToRegions(self):
+		'''Adds input text to list of entries.'''
 		region = self.regionTextEntry.get()
 		self.root.regions.append(region) #validate
 		victims = self.victimCountEntry.get()
 		self.root.regionsText += (region+', '+str(victims)+'\n')
+		if(self.cont['state']=='disabled'):
+			self.cont['state']='normal'
 
 	def toHospitalInput(self):
+		'''Proceeds to next input window.'''
 		self.root.regionsText += ('\n')
 		self.root.createHospitalInputWindow()
 		self.destroy()
@@ -156,91 +168,110 @@ class RegionInputWindow(tk.Frame):
 
 
 class HospitalInputWindow(tk.Frame):
+	'''GUI Input Window (hospital).'''
 	def __init__(self,root):
 		super(HospitalInputWindow,self).__init__()
 		self.root = root
-		hospitalLabel = (tk.Label(self, text='Hospital: ')).grid(row=0,column=0)
-		capacityLabel = (tk.Label(self, text='Capacity: ')).grid(row=1,column=0)
 		self.hospitalTextEntry = tk.StringVar()
 		self.capacityEntry = tk.IntVar()
-		self.hospital = tk.Entry(self, textvariable = self.hospitalTextEntry).grid(row=0,column=1)#need to validate text
-		self.capacity = tk.Entry(self,textvariable = self.capacityEntry).grid(row=1,column=1) #need to validate integer
-		self.add = tk.Button(self, text='Add', width=25, command=self.addToHospitals).grid(row=2,column=0)
-		self.cont = tk.Button(self, text='Continue', width=25, command=self.toAmbulanceInput).grid(row=2,column=1)
-		self.stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
+		self.cont = tk.Button(self, text='Continue', width=25, command=self.toAmbulanceInput,state='disabled')
+		self.cont.grid(row=2,column=1)
+		hospitalLabel = (tk.Label(self, text='Hospital: ')).grid(row=0,column=0)
+		capacityLabel = (tk.Label(self, text='Capacity: ')).grid(row=1,column=0)
+		hospital = tk.Entry(self, textvariable = self.hospitalTextEntry).grid(row=0,column=1)#need to validate text
+		capacity = tk.Entry(self,textvariable = self.capacityEntry).grid(row=1,column=1) #need to validate integer
+		add = tk.Button(self, text='Add', width=25, command=self.addToHospitals).grid(row=2,column=0)
+		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
 
-	'''Shows input window.'''
+	
 	def show(self):
+		'''Shows input window.'''
 		self.pack()
 
 	def addToHospitals(self):
+		'''Adds input text to list of entries.'''
 		hospital = self.hospitalTextEntry.get()
 		self.root.hospitals.append(hospital) #validate
 		capacity = self.capacityEntry.get()
 		self.root.hospitalsText += (hospital+', '+str(capacity)+'\n')
+		if(self.cont['state']=='disabled'):
+			self.cont['state']='normal'
 
 	def toAmbulanceInput(self):
+		'''Proceeds to next input window.'''
 		self.root.hospitalsText += ('\n')
 		self.root.createAmbulanceInputWindow()
 		self.destroy()
 		self.root.AmbulanceInputWindow.show()
 
 class AmbulanceInputWindow(tk.Frame):
+	'''GUI Input Window (ambulance).'''
 	def __init__(self,root):
 		super(AmbulanceInputWindow,self).__init__()
 		self.root = root
+		self.ambulanceTextEntry = tk.StringVar()
+		self.capacityEntry = tk.IntVar()
+		self.regionEntry = tk.StringVar()
+		self.regionEntry.set(self.root.regions[0])
+		self.hospitalEntry = tk.StringVar()
+		self.hospitalEntry.set(self.root.hospitals[0])
+		self.finish = tk.Button(self, text='Finish', width=25, command=self.finish,state='disabled')
+		self.finish.grid(row=4,column=1)
+
 		regionLabel = tk.Label(self, text='Region: ').grid(row=0,column=0)
 		hospitalLabel = tk.Label(self, text='Hospital: ').grid(row=1,column=0)
 		ambulanceLabel = tk.Label(self, text='Ambulance: ').grid(row=2,column=0)
 		capacityLabel = tk.Label(self, text='Capacity: ').grid(row=3,column=0)
-		self.ambulanceTextEntry = tk.StringVar()
-		self.capacityEntry = tk.IntVar()
-		self.regionEntry = tk.StringVar()
-		self.regionEntry.set(self.root.regions[0]) # default value
-		self.hospitalEntry = tk.StringVar()
-		self.hospitalEntry.set(self.root.hospitals[0]) # default value
-		self.region = tk.OptionMenu(self, self.regionEntry, *self.root.regions).grid(row=0,column=1)
-		self.hospital = tk.OptionMenu(self, self.hospitalEntry, *self.root.hospitals).grid(row=1,column=1)
-		self.ambulance = tk.Entry(self, textvariable = self.ambulanceTextEntry).grid(row=2,column=1) #need to validate text
-		self.capacity = tk.Entry(self, textvariable = self.capacityEntry).grid(row=3,column=1) #need to validate integer
-		self.add = tk.Button(self, text='Add', width=25, command=self.addToAmbulances).grid(row=4,column=0)
-		self.finish = tk.Button(self, text='Finish', width=25, command=self.finish).grid(row=4,column=1)
-		self.stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=5,column=0,columnspan=2)
 
-	'''Shows input window.'''
+		region = tk.OptionMenu(self, self.regionEntry, *self.root.regions).grid(row=0,column=1)
+		hospital = tk.OptionMenu(self, self.hospitalEntry, *self.root.hospitals).grid(row=1,column=1)
+		ambulance = tk.Entry(self, textvariable = self.ambulanceTextEntry).grid(row=2,column=1) #need to validate text
+		capacity = tk.Entry(self, textvariable = self.capacityEntry).grid(row=3,column=1) #need to validate integer
+		add = tk.Button(self, text='Add', width=25, command=self.addToAmbulances).grid(row=4,column=0)
+		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=5,column=0,columnspan=2)
+
+	
 	def show(self):
+		'''Shows input window.'''
 		self.pack()
 
 	def addToAmbulances(self):
+		'''Adds input text to list of entries.'''
 		ambulance = self.ambulanceTextEntry.get()
 		region = self.regionEntry.get()
 		hospital = self.hospitalEntry.get()
 		self.root.ambulances.append(ambulance) #validate
 		capacity = self.capacityEntry.get()
 		self.root.ambulancesText += (ambulance+', '+region+', '+hospital+', '+str(capacity)+'\n')
+		if(self.finish['state']=='disabled'):
+			self.finish['state']='normal'
 
 	def finish(self):
+		'''Proceeds to output option window.'''
 		self.root.ambulancesText += ('\n')
 		self.root.createWriteOutputWindow()
 		self.destroy()
 		self.root.WriteOutputWindow.show()
 
 class WriteOutputWindow(tk.Frame):
+	'''Provides the user an option to print output to a text file.'''
 	def __init__(self,root):
 		super(WriteOutputWindow,self).__init__()
 		self.root = root
 		self.radioSelection = tk.IntVar()
 		writeLabel = tk.Label(self, text='Write Output to File?').pack()
-		self.yes = tk.Radiobutton(self, text='Yes',variable=self.radioSelection,value=0).pack()
-		self.no = tk.Radiobutton(self, text='No',variable=self.radioSelection,value=1).pack()
-		self.cont = tk.Button(self, text='Continue', width=25, command=self.toOutput).pack()
+		yes = tk.Radiobutton(self, text='Yes',variable=self.radioSelection,value=0).pack()
+		no = tk.Radiobutton(self, text='No',variable=self.radioSelection,value=1).pack()
+		cont = tk.Button(self, text='Continue', width=25, command=self.toOutput).pack()
 
-	'''Shows selection window.'''
+	
 	def show(self):
+		'''Shows option window.'''
 		self.pack()
 
-	'''Determines user radio button selection.'''
+	
 	def toOutput(self):
+		'''Determines user radio button selection, proceeds to output window.'''
 		selected = self.radioSelection.get()
 		if(selected == 0):
 			self.root.importFile(True)
@@ -251,16 +282,18 @@ class WriteOutputWindow(tk.Frame):
 
 
 class OutputWindow(tk.Frame):
+	'''Output window.'''
 	def __init__(self,root):
 		super(OutputWindow,self).__init__()
 		self.root = root
 		self.textvar = WritableStringVar(root)
 		outputLabel = tk.Label(self, textvariable=self.textvar,wraplength='800')
 		outputLabel.pack()
-		self.stop = tk.Button(self, text='End', command=self.root.destroy).pack()
+		stop = tk.Button(self, text='End', command=self.root.destroy).pack()
 
-	'''Shows selection window.'''
+	
 	def show(self):
+		'''Shows output window.'''
 		self.pack()
 
 
