@@ -17,13 +17,13 @@ class MainApplication(tk.Tk):
 		self.AmbulanceInputWindow = None
 		self.WriteOutputWindow = None
 		self.OutputWindow = None
-		self.fromGUI = None
 		self.regionsText = "[Regions]\n"
 		self.regions = []
 		self.hospitalsText = "[Hospitals]\n"
 		self.hospitals = []
 		self.ambulancesText = "[Ambulatory Service]\n"
 		self.ambulances = []
+		self.fileData = None
 		self.selectionWindow.show()
 
 	
@@ -42,9 +42,9 @@ class MainApplication(tk.Tk):
 		self.AmbulanceInputWindow = AmbulanceInputWindow(self)	
 
 		
-	def createWriteOutputWindow(self):
+	def createWriteOutputWindow(self,guiInput):
 		'''Creates option to write output to file window.'''
-		self.WriteOutputWindow = WriteOutputWindow(self)	
+		self.WriteOutputWindow = WriteOutputWindow(self,guiInput)	
 
 		
 	def createOutputWindow(self):
@@ -52,22 +52,37 @@ class MainApplication(tk.Tk):
 		self.OutputWindow = OutputWindow(self)
 
 
-	def importFile(self,writeToFile):
-		'''Imports JSON or CSV file, or reads from GUI input.'''
-		if self.fromGUI:
-			text = self.regionsText + '\n' + self.hospitalsText + '\n' + self.ambulancesText
-			extraction = processGuiInput(text)
-		else:	
-			file = askopenfilename(filetypes=(('csv files','*.csv'),('json files','*.json')),title='Select a file')
-			extension = os.path.splitext(file)[1]
-			if extension == ".csv":
-				extraction = extractFile(file)
-			elif extension == ".json":
-				extraction = libDriver.extractFromJson(file,True)
+	def handleGUIFile(self,writeToFile):
+		'''Reads from GUI input.'''
+		text = self.regionsText + '\n' + self.hospitalsText + '\n' + self.ambulancesText
+		extraction = processGuiInput(text)
 		self.createOutputWindow()
 		if(extraction):
 			vNum, fDemanded, edges, names = extraction
 			self.generateOutput(vNum, fDemanded, edges, names,writeToFile)
+		else:
+			print("Error on input file", file=self.OutputWindow.textvar)
+		self.OutputWindow.show()
+
+	def importFile(self):
+		'''Imports JSON or CSV file.'''
+		file = askopenfilename(filetypes=(('csv files','*.csv'),('json files','*.json')),title='Select an input file')
+		extension = os.path.splitext(file)[1]
+		if extension == ".csv":
+			extraction = extractFile(file)
+		elif extension == ".json":
+			extraction = libDriver.extractFromJson(file,True)
+		if('extraction' in locals()):
+			self.fileData = extraction
+			self.createWriteOutputWindow(False)
+			self.WriteOutputWindow.show()
+			
+	def handleFile(self,writeToFile):
+		'''Handles CSV/JSON input.'''
+		self.createOutputWindow()
+		if(self.fileData):
+				vNum, fDemanded, edges, names = self.fileData
+				self.generateOutput(vNum, fDemanded, edges, names,writeToFile)
 		else:
 			print("Error on input file", file=self.OutputWindow.textvar)
 		self.OutputWindow.show()
@@ -116,9 +131,8 @@ class SelectionWindow(tk.Frame):
 		selected = self.radioSelection.get()
 		if(selected == 0):
 			self.root.fromGUI = False
-			self.root.createWriteOutputWindow()
+			self.root.importFile()
 			self.destroy()
-			self.root.WriteOutputWindow.show()
 		else:
 			self.root.fromGUI = True
 			self.root.createRegionInputWindow()
@@ -366,15 +380,16 @@ class AmbulanceInputWindow(tk.Frame):
 	def finish(self):
 		'''Proceeds to output option window.'''
 		self.root.ambulancesText += ('\n')
-		self.root.createWriteOutputWindow()
+		self.root.createWriteOutputWindow(True)
 		self.destroy()
 		self.root.WriteOutputWindow.show()
 
 class WriteOutputWindow(tk.Frame):
 	'''Provides the user an option to print output to a text file.'''
-	def __init__(self,root):
+	def __init__(self,root,guiInput):
 		super(WriteOutputWindow,self).__init__()
 		self.root = root
+		self.guiInput = guiInput
 		self.radioSelection = tk.IntVar()
 		writeLabel = tk.Label(self, text='Write Output to File?').pack()
 		yes = tk.Radiobutton(self, text='Yes',variable=self.radioSelection,value=0).pack()
@@ -390,10 +405,16 @@ class WriteOutputWindow(tk.Frame):
 	def toOutput(self):
 		'''Determines user radio button selection, proceeds to output window.'''
 		selected = self.radioSelection.get()
-		if(selected == 0):
-			self.root.importFile(True)
+		if(self.guiInput):
+			if(selected == 0):
+				self.root.handleGUIFile(True)
+			else:
+				self.root.handleGUIFile(False)
 		else:
-			self.root.importFile(False)
+			if(selected == 0):
+				self.root.handleFile(True)
+			else:
+				self.root.handleFile(False)
 		self.destroy()
 		self.root.OutputWindow.show()
 
