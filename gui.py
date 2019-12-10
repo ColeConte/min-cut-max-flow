@@ -4,9 +4,6 @@ import libDriver
 from tkinter.filedialog import askopenfilename
 import os.path
 
-#To Do:
-#Validate for no repeat entries
-
 class MainApplication(tk.Tk):
 	'''Controller for all windows in GUI'''
 	def __init__(self):
@@ -25,32 +22,26 @@ class MainApplication(tk.Tk):
 		self.ambulances = []
 		self.fileData = None
 		self.selectionWindow.show()
-
 	
 	def createRegionInputWindow(self):
 		'''Creates GUI input window.'''	
 		self.RegionInputWindow = RegionInputWindow(self)
-
 	
 	def createHospitalInputWindow(self):
 		'''Creates GUI input window.'''	
 		self.HospitalInputWindow = HospitalInputWindow(self)
-
 	
 	def createAmbulanceInputWindow(self):
 		'''Creates GUI input window.'''	
 		self.AmbulanceInputWindow = AmbulanceInputWindow(self)	
-
-		
+	
 	def createWriteOutputWindow(self,guiInput):
 		'''Creates option to write output to file window.'''
 		self.WriteOutputWindow = WriteOutputWindow(self,guiInput)	
-
 		
 	def createOutputWindow(self):
 		'''Creates output window.'''
 		self.OutputWindow = OutputWindow(self)
-
 
 	def handleGUIFile(self,writeToFile):
 		'''Reads from GUI input.'''
@@ -108,7 +99,6 @@ class MainApplication(tk.Tk):
 					if(i < len(path)-3):
 						print(" -> ", end="",file=f)
 
-
 class SelectionWindow(tk.Frame):
 	'''Window that allows user to select input type.'''
 	def __init__(self,root):
@@ -119,12 +109,10 @@ class SelectionWindow(tk.Frame):
 		fromGUI = tk.Radiobutton(self, text='From GUI',variable=self.radioSelection,value=1).pack()
 		cont = tk.Button(self, text='Continue', width=25, command=self.inputType).pack()
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).pack()
-
 	
 	def show(self):
 		'''Shows selection window.'''
 		self.pack()
-
 	
 	def inputType(self):
 		'''Determines user radio button selection.'''
@@ -138,7 +126,6 @@ class SelectionWindow(tk.Frame):
 			self.root.createRegionInputWindow()
 			self.destroy()
 			self.root.RegionInputWindow.show()
-
 
 class RegionInputWindow(tk.Frame):
 	'''GUI Input Window (region).'''
@@ -157,13 +144,11 @@ class RegionInputWindow(tk.Frame):
 		v2 = (self.register(self.victimsValidate))
 		self.victims = tk.Entry(self, textvariable = self.victimCountEntry, validate='key',validatecommand=(v2,'%d','%P','%S'))
 		self.victims.grid(row=1,column=1)
-
 		self.cont = tk.Button(self, text='Continue', width=25, command=self.toHospitalInput,state='disabled')
 		self.cont.grid(row=2,column=1)
 		regionLabel = (tk.Label(self, text='Region: ')).grid(row=0,column=0)
 		victimCountLabel = (tk.Label(self, text='Victims: ')).grid(row=1,column=0)
-		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
-	
+		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)	
 
 	def show(self):
 		'''Shows input window.'''
@@ -202,7 +187,6 @@ class RegionInputWindow(tk.Frame):
 				self.add['state']='disabled'
 			return True
 
-
 	def addToRegions(self):
 		'''Adds input text to list of entries.'''
 		region = self.regionTextEntry.get()
@@ -218,7 +202,6 @@ class RegionInputWindow(tk.Frame):
 		self.root.createHospitalInputWindow()
 		self.destroy()
 		self.root.HospitalInputWindow.show()
-
 
 class HospitalInputWindow(tk.Frame):
 	'''GUI Input Window (hospital).'''
@@ -242,7 +225,6 @@ class HospitalInputWindow(tk.Frame):
 		self.capacity = tk.Entry(self,textvariable = self.capacityEntry,validate='key',validatecommand=(v2,'%d','%P','%S'))
 		self.capacity.grid(row=1,column=1)
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
-
 
 	def show(self):
 		'''Shows input window.'''
@@ -327,7 +309,6 @@ class AmbulanceInputWindow(tk.Frame):
 		region = tk.OptionMenu(self, self.regionEntry, *self.root.regions).grid(row=0,column=1)
 		hospital = tk.OptionMenu(self, self.hospitalEntry, *self.root.hospitals).grid(row=1,column=1)
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=5,column=0,columnspan=2)
-
 	
 	def show(self):
 		'''Shows input window.'''
@@ -395,12 +376,10 @@ class WriteOutputWindow(tk.Frame):
 		yes = tk.Radiobutton(self, text='Yes',variable=self.radioSelection,value=0).pack()
 		no = tk.Radiobutton(self, text='No',variable=self.radioSelection,value=1).pack()
 		cont = tk.Button(self, text='Continue', width=25, command=self.toOutput).pack()
-
 	
 	def show(self):
 		'''Shows option window.'''
 		self.pack()
-
 	
 	def toOutput(self):
 		'''Determines user radio button selection, proceeds to output window.'''
@@ -418,7 +397,6 @@ class WriteOutputWindow(tk.Frame):
 		self.destroy()
 		self.root.OutputWindow.show()
 
-
 class OutputWindow(tk.Frame):
 	'''Output window.'''
 	def __init__(self,root):
@@ -429,11 +407,9 @@ class OutputWindow(tk.Frame):
 		outputLabel.pack()
 		stop = tk.Button(self, text='End', command=self.root.destroy).pack()
 
-	
 	def show(self):
 		'''Shows output window.'''
 		self.pack()
-
 
 class WritableStringVar(tk.StringVar):
 	'''Writable subclass of StringVar class.
