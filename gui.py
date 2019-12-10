@@ -4,9 +4,7 @@ import libDriver
 from tkinter.filedialog import askopenfilename
 import os.path
 
-#To Fix:
-#Validate text and integer inputs
-#Validate at least one input
+#To Do:
 #Validate for no repeat entries
 
 class MainApplication(tk.Tk):
@@ -132,23 +130,64 @@ class RegionInputWindow(tk.Frame):
 	'''GUI Input Window (region).'''
 	def __init__(self,root):
 		super(RegionInputWindow,self).__init__()
+		self.regionValid = False
+		self.victimsValid = False
 		self.root = root
 		self.regionTextEntry = tk.StringVar()
 		self.victimCountEntry = tk.IntVar()
-		self.region = tk.Entry(self, textvariable = self.regionTextEntry)
-		self.region.grid(row=0,column=1) #need to validate text
-		self.victims = tk.Entry(self, textvariable = self.victimCountEntry)
-		self.victims.grid(row=1,column=1) #need to validate integer
+		self.add = tk.Button(self, text='Add', width=25, command=self.addToRegions,state='disabled')
+		self.add.grid(row=2,column=0)
+		v1 = (self.register(self.regionValidate))
+		self.region = tk.Entry(self, textvariable = self.regionTextEntry,validate='key',validatecommand=(v1,'%d','%P'))
+		self.region.grid(row=0,column=1)
+		v2 = (self.register(self.victimsValidate))
+		self.victims = tk.Entry(self, textvariable = self.victimCountEntry, validate='key',validatecommand=(v2,'%d','%P','%S'))
+		self.victims.grid(row=1,column=1)
+
 		self.cont = tk.Button(self, text='Continue', width=25, command=self.toHospitalInput,state='disabled')
 		self.cont.grid(row=2,column=1)
 		regionLabel = (tk.Label(self, text='Region: ')).grid(row=0,column=0)
 		victimCountLabel = (tk.Label(self, text='Victims: ')).grid(row=1,column=0)
-		add = tk.Button(self, text='Add', width=25, command=self.addToRegions).grid(row=2,column=0)
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
 	
+
 	def show(self):
 		'''Shows input window.'''
 		self.pack()
+
+	def regionValidate(self,d,P):
+		'''Validate region input is not blank.'''
+		if(d=='0' and P==''):
+			self.regionValid = False
+		else:
+			self.regionValid = True
+		if(self.regionValid and self.victimsValid):
+			self.add['state']='normal'
+		else:
+			self.add['state']='disabled'
+		return True
+
+	def victimsValidate(self,d,P,S):
+		'''Validate victim input is an integer.'''
+		if(d=='1'):
+			if(S.isdigit()):
+				if(int(P)>0):
+					self.victimsValid = True
+				if(self.regionValid and self.victimsValid):
+					self.add['state']='normal'
+				else:
+					self.add['state']='disabled'	
+				return True
+			return False
+		else:
+			if(P=='' or int(P)==0):
+				self.victimsValid = False
+			if(self.regionValid and self.victimsValid):
+				self.add['state']='normal'
+			else:
+				self.add['state']='disabled'
+			return True
+
 
 	def addToRegions(self):
 		'''Adds input text to list of entries.'''
@@ -172,21 +211,61 @@ class HospitalInputWindow(tk.Frame):
 	def __init__(self,root):
 		super(HospitalInputWindow,self).__init__()
 		self.root = root
+		self.hospitalValid = False
+		self.capacityValid = False
 		self.hospitalTextEntry = tk.StringVar()
 		self.capacityEntry = tk.IntVar()
+		self.add = tk.Button(self, text='Add', width=25, command=self.addToHospitals,state='disabled')
+		self.add.grid(row=2,column=0)
 		self.cont = tk.Button(self, text='Continue', width=25, command=self.toAmbulanceInput,state='disabled')
 		self.cont.grid(row=2,column=1)
 		hospitalLabel = (tk.Label(self, text='Hospital: ')).grid(row=0,column=0)
 		capacityLabel = (tk.Label(self, text='Capacity: ')).grid(row=1,column=0)
-		hospital = tk.Entry(self, textvariable = self.hospitalTextEntry).grid(row=0,column=1)#need to validate text
-		capacity = tk.Entry(self,textvariable = self.capacityEntry).grid(row=1,column=1) #need to validate integer
-		add = tk.Button(self, text='Add', width=25, command=self.addToHospitals).grid(row=2,column=0)
+		v1 = (self.register(self.hospitalValidate))
+		v2 = (self.register(self.capacityValidate))
+		self.hospital = tk.Entry(self, textvariable = self.hospitalTextEntry,validate='key',validatecommand=(v1,'%d','%P'))
+		self.hospital.grid(row=0,column=1)
+		self.capacity = tk.Entry(self,textvariable = self.capacityEntry,validate='key',validatecommand=(v2,'%d','%P','%S'))
+		self.capacity.grid(row=1,column=1)
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=3,column=0,columnspan=2)
 
-	
+
 	def show(self):
 		'''Shows input window.'''
 		self.pack()
+
+	def hospitalValidate(self,d,P):
+		'''Validate hospital input is not blank.'''
+		if(d=='0' and P==''):
+			self.hospitalValid = False
+		else:
+			self.hospitalValid = True
+		if(self.hospitalValid and self.capacityValid):
+			self.add['state']='normal'
+		else:
+			self.add['state']='disabled'
+		return True
+
+	def capacityValidate(self,d,P,S):
+		'''Validate capacity input is an integer.'''
+		if(d=='1'):
+			if(S.isdigit()):
+				if(int(P)>0):
+					self.capacityValid = True
+				if(self.hospitalValid and self.capacityValid):
+					self.add['state']='normal'
+				else:
+					self.add['state']='disabled'	
+				return True
+			return False
+		else:
+			if(P=='' or int(P)==0):
+				self.capacityValid = False
+			if(self.hospitalValid and self.capacityValid):
+				self.add['state']='normal'
+			else:
+				self.add['state']='disabled'
+			return True
 
 	def addToHospitals(self):
 		'''Adds input text to list of entries.'''
@@ -209,31 +288,69 @@ class AmbulanceInputWindow(tk.Frame):
 	def __init__(self,root):
 		super(AmbulanceInputWindow,self).__init__()
 		self.root = root
+		self.ambulanceValid = False
+		self.capacityValid = False
 		self.ambulanceTextEntry = tk.StringVar()
 		self.capacityEntry = tk.IntVar()
 		self.regionEntry = tk.StringVar()
 		self.regionEntry.set(self.root.regions[0])
 		self.hospitalEntry = tk.StringVar()
 		self.hospitalEntry.set(self.root.hospitals[0])
+		self.add = tk.Button(self, text='Add', width=25, command=self.addToAmbulances,state='disabled')
+		self.add.grid(row=4,column=0)
 		self.finish = tk.Button(self, text='Finish', width=25, command=self.finish,state='disabled')
 		self.finish.grid(row=4,column=1)
-
+		v1 = (self.register(self.ambulanceValidate))
+		v2 = (self.register(self.capacityValidate))
+		self.ambulance = tk.Entry(self, textvariable = self.ambulanceTextEntry,validate='key',validatecommand=(v1,'%d','%P'))
+		self.ambulance.grid(row=2,column=1)
+		self.capacity = tk.Entry(self, textvariable = self.capacityEntry,validate='key',validatecommand=(v2,'%d','%P','%S'))
+		self.capacity.grid(row=3,column=1)
 		regionLabel = tk.Label(self, text='Region: ').grid(row=0,column=0)
 		hospitalLabel = tk.Label(self, text='Hospital: ').grid(row=1,column=0)
 		ambulanceLabel = tk.Label(self, text='Ambulance: ').grid(row=2,column=0)
 		capacityLabel = tk.Label(self, text='Capacity: ').grid(row=3,column=0)
-
 		region = tk.OptionMenu(self, self.regionEntry, *self.root.regions).grid(row=0,column=1)
 		hospital = tk.OptionMenu(self, self.hospitalEntry, *self.root.hospitals).grid(row=1,column=1)
-		ambulance = tk.Entry(self, textvariable = self.ambulanceTextEntry).grid(row=2,column=1) #need to validate text
-		capacity = tk.Entry(self, textvariable = self.capacityEntry).grid(row=3,column=1) #need to validate integer
-		add = tk.Button(self, text='Add', width=25, command=self.addToAmbulances).grid(row=4,column=0)
 		stop = tk.Button(self, text='Stop', width=25, command=self.root.destroy).grid(row=5,column=0,columnspan=2)
 
 	
 	def show(self):
 		'''Shows input window.'''
 		self.pack()
+
+	def ambulanceValidate(self,d,P):
+		'''Validate ambulance input is not blank.'''
+		if(d=='0' and P==''):
+			self.ambulanceValid = False
+		else:
+			self.ambulanceValid = True
+		if(self.ambulanceValid and self.capacityValid):
+			self.add['state']='normal'
+		else:
+			self.add['state']='disabled'
+		return True
+
+	def capacityValidate(self,d,P,S):
+		'''Validate capacity input is an integer.'''
+		if(d=='1'):
+			if(S.isdigit()):
+				if(int(P)>0):
+					self.capacityValid = True
+				if(self.ambulanceValid and self.capacityValid):
+					self.add['state']='normal'
+				else:
+					self.add['state']='disabled'	
+				return True
+			return False
+		else:
+			if(P=='' or int(P)==0):
+				self.capacityValid = False
+			if(self.ambulanceValid and self.capacityValid):
+				self.add['state']='normal'
+			else:
+				self.add['state']='disabled'
+			return True
 
 	def addToAmbulances(self):
 		'''Adds input text to list of entries.'''
